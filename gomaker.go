@@ -35,12 +35,11 @@ func getAllCodeFiles() {
 				cmd = exec.Command("gcc", f.Name(), "-o", output_name)
 			}
 
-			fmt.Println("Executing: ", cmd)
+			fmt.Println("Executing:", cmd)
 			cmd.Stderr = os.Stderr
 			cmd.Run()
 
-			cmd = exec.Command("mv", output_name, "output/")
-			cmd.Run()
+			exec.Command("mv", output_name, "output/").Run()
 
 			files_compiled++
 		}
@@ -50,8 +49,7 @@ func getAllCodeFiles() {
 }
 
 func createOutputFolder() {
-	cmd := exec.Command("mkdir", "output")
-	cmd.Run()
+	exec.Command("mkdir", "output").Run()
 }
 
 func main() {
