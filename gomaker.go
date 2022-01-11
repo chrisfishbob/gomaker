@@ -6,6 +6,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	// Import go routines
+	"sync"
 )
 
 // Checks if the file is a valid c or cpp file
@@ -21,28 +23,39 @@ func compileFiles() {
 		fmt.Println(err)
 	}
 
+	// Create a waitgroup
+	var wg sync.WaitGroup
+	wg.Add(len(files))
+
 	for _, file := range files {
-		if isValidFile(file) {
-			var cmd *exec.Cmd
-			var output_name string
-
-			if strings.Contains(file.Name(), "cpp") {
-				output_name = strings.TrimSuffix(file.Name(), ".cpp")
-				cmd = exec.Command("g++", file.Name(), "-o", output_name)
-			} else {
-				output_name = strings.TrimSuffix(file.Name(), ".c")
-				cmd = exec.Command("gcc", file.Name(), "-o", output_name)
+		go func(file os.FileInfo) {
+			// We defer wg.Done() to decrement waitgroup regarless of validity of name
+			defer wg.Done()
+			
+			if isValidFile(file) {
+				var cmd *exec.Cmd
+				var output_name string
+	
+				if strings.Contains(file.Name(), "cpp") {
+					output_name = strings.TrimSuffix(file.Name(), ".cpp")
+					cmd = exec.Command("g++", file.Name(), "-o", output_name)
+				} else {
+					output_name = strings.TrimSuffix(file.Name(), ".c")
+					cmd = exec.Command("gcc", file.Name(), "-o", output_name)
+				}
+	
+				fmt.Println("Executing:", cmd)
+				cmd.Stderr = os.Stderr
+				cmd.Run()
+	
+				exec.Command("mv", output_name, "output/").Run()
+	
+				files_compiled++
 			}
-
-			fmt.Println("Executing:", cmd)
-			cmd.Stderr = os.Stderr
-			cmd.Run()
-
-			exec.Command("mv", output_name, "output/").Run()
-
-			files_compiled++
-		}
+		}(file)
 	}
+
+	wg.Wait()
 
 	println("Compiled", files_compiled, "files")
 }
