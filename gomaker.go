@@ -70,7 +70,7 @@ func runCompileCommand(file os.FileInfo, files_compiled *int) {
 
 
 func createOutputFolder() {
-	exec.Command("mkdir", "output").Run()
+	os.Mkdir("output", os.ModePerm)
 }
 
 func main() {
