@@ -62,7 +62,8 @@ func runCompileCommand(file os.FileInfo, files_compiled *int) {
 	cmd.Stderr = os.Stderr
 	cmd.Run()
 
-	exec.Command("mv", output_name, "output/").Run()
+	cwd, _ := os.Getwd()
+	exec.Command("mv", output_name, cwd + "/output").Run()
 
 	(*files_compiled)++
 }
