@@ -18,6 +18,8 @@ func isValidFile(f os.FileInfo) bool {
 func processFiles() {
 	start := time.Now()
 	files_compiled := 0
+	files_skipped := 0
+	files_skipped_string := ""
 
 	files, err := ioutil.ReadDir(".")
 	if err != nil {
@@ -35,6 +37,9 @@ func processFiles() {
 
 			if isValidFile(file) {
 				runCompileCommand(file, &files_compiled)
+			}else{
+				files_skipped_string += file.Name() + "\n"
+				files_skipped++
 			}
 		}(file)
 	}
@@ -42,7 +47,9 @@ func processFiles() {
 	// Gathering all the goroutines
 	wg.Wait()  
 	end := time.Now()
-	fmt.Println("Compiled", files_compiled, "files in", end.Sub(start).Seconds(), "seconds")
+	fmt.Println("\nCompiled", files_compiled, "files in", end.Sub(start).Seconds(), "seconds")
+	fmt.Println("Skipped", files_skipped, "files: ")
+	fmt.Println(files_skipped_string)
 }
 
 func runCompileCommand(file os.FileInfo, files_compiled *int) {
