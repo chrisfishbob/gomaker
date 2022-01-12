@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"bytes"
 )
 
 // Checks if the file is a valid c or cpp file
@@ -66,8 +67,17 @@ func runCompileCommand(file os.FileInfo, files_compiled *int) {
 
 	fmt.Println("Executing:", cmd)
 	// Ensures that warnings and errors are printed
-	cmd.Stderr = os.Stderr
+	// Override stderr to a buffer
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
 	cmd.Run()
+	// Check if the buffer is empty
+	if stderr.String() == "" {
+		fmt.Println("Compiled", file.Name(), "with no compiler warnings")
+	}else{
+		fmt.Println("file", file.Name(), "requires attention")
+	}
 
 	cwd, _ := os.Getwd()
 	exec.Command("mv", output_name, cwd + "/output").Run()
