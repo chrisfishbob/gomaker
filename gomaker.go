@@ -42,7 +42,118 @@ func processFiles() {
 				files_skipped_string += file.Name() + "\n"
 				files_skipped++
 			}
+		}(file)package main
+
+import (
+	"bytes"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"os/exec"
+	"strings"
+	"sync"
+	"time"
+)
+
+// Checks if the file is a valid c or cpp file
+func isValidFile(f os.FileInfo) bool {
+	return !f.IsDir() && strings.Contains(f.Name(), ".c") && strings.Count(f.Name(), ".") == 1
+}
+
+func processFiles() {
+	start := time.Now()
+	files_compiled := 0
+	files_skipped := 0
+	files_skipped_string := ""
+	string_slice := make([]string, 0)
+	stderr_slice := make([]string, 0)
+
+	files, err := ioutil.ReadDir(".")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// Create a waitgroup
+	var wg sync.WaitGroup
+	wg.Add(len(files))
+
+	for _, file := range files {
+		go func(file os.FileInfo) {
+			// We defer wg.Done() to decrement waitgroup regarless of validity of name
+			defer wg.Done()
+
+			if isValidFile(file) {
+				runCompileCommand(file, &files_compiled, &string_slice, &stderr_slice)
+			} else {
+				files_skipped_string += file.Name() + "\n"
+				files_skipped++
+			}
 		}(file)
+	}
+
+	// Gathering all the goroutines
+	wg.Wait()
+	end := time.Now()
+
+	// Use the slices to print out the files that did not compile perfectly
+	for i := 0; i < len(string_slice); i++ {
+		fmt.Println("\n\n" + string_slice[i], "compiled with the following warnings:")
+		fmt.Println(stderr_slice[i])
+	}
+
+	fmt.Println("The following compiled with warnings / errors:")
+	for i := 0; i <len(string_slice); i++ {
+		fmt.Println(string_slice[i])
+	}
+	fmt.Println("")
+
+	fmt.Println("Skipped", files_skipped, "files: ")
+	fmt.Println(files_skipped_string)
+	fmt.Println("Compiled", files_compiled, "files in", end.Sub(start).Seconds(), "seconds")
+}
+
+func runCompileCommand(file os.FileInfo, files_compiled *int, string_slice *[]string, stderr_slice *[]string) {
+	var cmd *exec.Cmd
+	var output_name string
+
+	if strings.Contains(file.Name(), "cpp") {
+		output_name = strings.TrimSuffix(file.Name(), ".cpp")
+		cmd = exec.Command("g++", file.Name(), "-fdiagnostics-color=always", "-o", output_name)
+	} else {
+		output_name = strings.TrimSuffix(file.Name(), ".c")
+		cmd = exec.Command("gcc", file.Name(), "-fdiagnostics-color=always", "-o", output_name)
+	}
+
+	// Ensures that warnings and errors are printed
+	// Override stderr to a buffer
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+
+	cmd.Run()
+	// Check if the buffer is empty
+	if stderr.String() == "" {
+		fmt.Println("Compiled", file.Name(), "with no compiler warnings")
+	} else {
+		*string_slice = append(*string_slice, file.Name())
+		*stderr_slice = append(*stderr_slice, stderr.String())
+	}
+
+	cwd, _ := os.Getwd()
+	exec.Command("mv", output_name, cwd+"/output").Run()
+
+	(*files_compiled)++
+}
+
+func createOutputFolder() {
+	os.Mkdir("output", os.ModePerm)
+}
+
+func main() {
+	createOutputFolder()
+	processFiles()
+	fmt.Print("Compilation complete.")
+}
+
 	}
 
 	// Gathering all the goroutines
