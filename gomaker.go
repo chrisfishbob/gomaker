@@ -85,6 +85,17 @@ func unzipToCurrentDirectory() {
 	}
 }
 
+func extractFolders() {
+	cmd_string := "find  . -mindepth 2 -type f -exec mv {} . \\;"
+	//call the cmd_string command with bash
+	cmd := exec.Command("bash", "-c", cmd_string)
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+
 // Checks if the file is a valid c or cpp file
 func isValidFile(f os.FileInfo) bool {
 	return !f.IsDir() && strings.Contains(f.Name(), ".c") && strings.Count(f.Name(), ".") == 1
@@ -193,6 +204,7 @@ func createOutputFolder() {
 
 func main() {
 	unzipToCurrentDirectory()
+	extractFolders()
 	createOutputFolder()
 	processFiles()
 	fmt.Print("Compilation complete.")
