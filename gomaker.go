@@ -16,65 +16,95 @@ import (
 
 func Unzip(src string, dest string) ([]string, error) {
 
-    var filenames []string
+	var filenames []string
 
-    r, err := zip.OpenReader(src)
-    if err != nil {
-        return filenames, err
-    }
-    defer r.Close()
+	r, err := zip.OpenReader(src)
+	if err != nil {
+		return filenames, err
+	}
+	defer r.Close()
 
-    for _, f := range r.File {
+	for _, f := range r.File {
 
-        // Store filename/path for returning and using later on
-        fpath := filepath.Join(dest, f.Name)
+		// Store filename/path for returning and using later on
+		fpath := filepath.Join(dest, f.Name)
 
-        // Check for ZipSlip. More Info: http://bit.ly/2MsjAWE
-        if !strings.HasPrefix(fpath, filepath.Clean(dest)+string(os.PathSeparator)) {
-            return filenames, fmt.Errorf("%s: illegal file path", fpath)
-        }
+		// Check for ZipSlip. More Info: http://bit.ly/2MsjAWE
+		if !strings.HasPrefix(fpath, filepath.Clean(dest)+string(os.PathSeparator)) {
+			return filenames, fmt.Errorf("%s: illegal file path", fpath)
+		}
 
-        filenames = append(filenames, fpath)
+		filenames = append(filenames, fpath)
 
-        if f.FileInfo().IsDir() {
-            // Make Folder
-            os.MkdirAll(fpath, os.ModePerm)
-            continue
-        }
+		if f.FileInfo().IsDir() {
+			// Make Folder
+			os.MkdirAll(fpath, os.ModePerm)
+			continue
+		}
 
-        // Make File
-        if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
-            return filenames, err
-        }
+		// Make File
+		if err = os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
+			return filenames, err
+		}
 
-        outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
-        if err != nil {
-            return filenames, err
-        }
+		outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			return filenames, err
+		}
 
-        rc, err := f.Open()
-        if err != nil {
-            return filenames, err
-        }
+		rc, err := f.Open()
+		if err != nil {
+			return filenames, err
+		}
 
-        _, err = io.Copy(outFile, rc)
+		_, err = io.Copy(outFile, rc)
 
-        // Close the file without defer to close before next iteration of loop
-        outFile.Close()
-        rc.Close()
+		// Close the file without defer to close before next iteration of loop
+		outFile.Close()
+		rc.Close()
 
-        if err != nil {
-            return filenames, err
-        }
-    }
-    return filenames, nil
+		if err != nil {
+			return filenames, err
+		}
+	}
+	return filenames, nil
 }
 
+func unzipToCurrentDirectory(zipFile string) {
+	pwd, _ := os.Getwd()
 
+	Unzip(zipFile, pwd)
+}
 
 // Checks if the file is a valid c or cpp file
 func isValidFile(f os.FileInfo) bool {
 	return !f.IsDir() && strings.Contains(f.Name(), ".c") && strings.Count(f.Name(), ".") == 1
+}
+
+func printExitInformation(string_slice *[]string,
+	stderr_slice *[]string,
+	files_skipped int,
+	files_compiled int,
+	start time.Time,
+	end time.Time,
+	files_skipped_string string) {
+
+	// Use the slices to print out the files that did not compile perfectly
+	for i := 0; i < len(*string_slice); i++ {
+		fmt.Println("\n\n"+(*string_slice)[i], "compiled with the following warnings:")
+		fmt.Println((*stderr_slice)[i])
+	}
+
+	fmt.Println("The following compiled with warnings / errors:")
+
+	for i := 0; i < len(*string_slice); i++ {
+		fmt.Println((*string_slice)[i])
+	}
+
+	fmt.Println("")
+	fmt.Println("Skipped", files_skipped, "files: ")
+	fmt.Println(files_skipped_string)
+	fmt.Println("Compiled", files_compiled, "files in", end.Sub(start).Seconds(), "seconds")
 }
 
 func processFiles() {
@@ -112,23 +142,8 @@ func processFiles() {
 	wg.Wait()
 	end := time.Now()
 
-	// Use the slices to print out the files that did not compile perfectly
-	for i := 0; i < len(string_slice); i++ {
-		fmt.Println("\n\n" + string_slice[i], "compiled with the following warnings:")
-		fmt.Println(stderr_slice[i])
-	}
-
-	fmt.Println("The following compiled with warnings / errors:")
-	for i := 0; i <len(string_slice); i++ {
-		fmt.Println(string_slice[i])
-	}
-	fmt.Println("")
-
-	fmt.Println("Skipped", files_skipped, "files: ")
-	fmt.Println(files_skipped_string)
-	fmt.Println("Compiled", files_compiled, "files in", end.Sub(start).Seconds(), "seconds")
+	printExitInformation(&string_slice, &stderr_slice, files_skipped, files_compiled, start, end, files_skipped_string)
 }
-
 
 func runCompileCommand(file os.FileInfo, files_compiled *int, string_slice *[]string, stderr_slice *[]string) {
 	var cmd *exec.Cmd
@@ -156,6 +171,7 @@ func runCompileCommand(file os.FileInfo, files_compiled *int, string_slice *[]st
 		*stderr_slice = append(*stderr_slice, stderr.String())
 	}
 
+	// TODO: Change implementation of move to be a more portable function
 	cwd, _ := os.Getwd()
 	exec.Command("mv", output_name, cwd+"/output").Run()
 
@@ -167,8 +183,8 @@ func createOutputFolder() {
 }
 
 func main() {
+	unzipToCurrentDirectory("studentz.zip")
 	createOutputFolder()
 	processFiles()
 	fmt.Print("Compilation complete.")
 }
-
