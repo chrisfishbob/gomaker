@@ -70,10 +70,19 @@ func Unzip(src string, dest string) ([]string, error) {
 	return filenames, nil
 }
 
-func unzipToCurrentDirectory(zipFile string) {
+func unzipToCurrentDirectory() {
+	files, err := ioutil.ReadDir(".")
 	pwd, _ := os.Getwd()
 
-	Unzip(zipFile, pwd)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for _, file := range files {
+		if strings.Contains(file.Name(), ".zip") {
+			Unzip(file.Name(), pwd)
+		}
+	}
 }
 
 // Checks if the file is a valid c or cpp file
@@ -183,7 +192,7 @@ func createOutputFolder() {
 }
 
 func main() {
-	unzipToCurrentDirectory("studentz.zip")
+	unzipToCurrentDirectory()
 	createOutputFolder()
 	processFiles()
 	fmt.Print("Compilation complete.")
