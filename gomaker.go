@@ -54,6 +54,7 @@ func Unzip(src string, dest string) ([]string, error) {
 
 		rc, err := f.Open()
 		if err != nil {
+
 			return filenames, err
 		}
 
@@ -202,10 +203,35 @@ func createOutputFolder() {
 	os.Mkdir("output", os.ModePerm)
 }
 
+func confirmRun(){
+	cwd, _ := os.Getwd()
+	fmt.Println("gomaker is about to execute at", cwd, "are you sure you want to continue? (y/n)")
+	var input string
+	fmt.Scanln(&input)
+	if input != "y" {
+		fmt.Println("Exiting...")
+		os.Exit(0)
+	}
+
+}
+
+func removeEmptyDirectories() {
+	cmd_string := "find . -type d -empty -delete"
+	//call the cmd_string command with bash
+	cmd := exec.Command("bash", "-c", cmd_string)
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+}
+
 func main() {
+	confirmRun()
 	unzipToCurrentDirectory()
 	extractFolders()
 	createOutputFolder()
 	processFiles()
+	removeEmptyDirectories()
 	fmt.Print("Compilation complete.")
 }
