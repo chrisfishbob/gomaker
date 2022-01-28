@@ -3,6 +3,7 @@ package main
 import (
 	"archive/zip"
 	"bytes"
+	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -96,7 +97,6 @@ func extractFolders() {
 	}
 }
 
-
 // Checks if the file is a valid c or cpp file
 func isValidFile(f os.FileInfo) bool {
 	return !f.IsDir() && strings.Contains(f.Name(), ".c") && strings.Count(f.Name(), ".") == 1
@@ -163,19 +163,26 @@ func processFiles() {
 	wg.Wait()
 	end := time.Now()
 
-	printExitInformation(&string_slice, &stderr_slice, files_skipped, files_compiled, start, end, files_skipped_string)
+	printExitInformation(
+		&string_slice,
+		&stderr_slice,
+		files_skipped,
+		files_compiled,
+		start, end,
+		files_skipped_string)
 }
 
 func runCompileCommand(file os.FileInfo, files_compiled *int, string_slice *[]string, stderr_slice *[]string) {
 	var cmd *exec.Cmd
 	var output_name string
+	additional_flags := "-lm"
 
 	if strings.Contains(file.Name(), "cpp") {
 		output_name = strings.TrimSuffix(file.Name(), ".cpp")
-		cmd = exec.Command("g++", file.Name(), "-fdiagnostics-color=always", "-o", output_name)
+		cmd = exec.Command("g++", file.Name(), "-fdiagnostics-color=always", "-o", output_name, additional_flags)
 	} else {
 		output_name = strings.TrimSuffix(file.Name(), ".c")
-		cmd = exec.Command("gcc", file.Name(), "-fdiagnostics-color=always", "-o", output_name)
+		cmd = exec.Command("gcc", file.Name(), "-fdiagnostics-color=always", "-o", output_name, additional_flags)
 	}
 
 	// Ensures that warnings and errors are printed
@@ -192,7 +199,6 @@ func runCompileCommand(file os.FileInfo, files_compiled *int, string_slice *[]st
 		*stderr_slice = append(*stderr_slice, stderr.String())
 	}
 
-	// TODO: Change implementation of move to be a more portable function
 	cwd, _ := os.Getwd()
 	exec.Command("mv", output_name, cwd+"/output").Run()
 
@@ -203,7 +209,7 @@ func createOutputFolder() {
 	os.Mkdir("output", os.ModePerm)
 }
 
-func confirmRun(){
+func confirmRun() {
 	cwd, _ := os.Getwd()
 	fmt.Println("gomaker is about to execute at", cwd, "are you sure you want to continue? (y/n)")
 	var input string
@@ -227,9 +233,21 @@ func removeEmptyDirectories() {
 }
 
 func main() {
-	confirmRun()
-	unzipToCurrentDirectory()
-	extractFolders()
+	//take in the command line flags
+	var frFlag = flag.Bool("fr", false, "Flatten folders recursively")
+	var yFlag = flag.Bool("y", false, "Skip confirmation prompt")
+	var zFlag = flag.Bool("z", false, "Unzips all .zip files")
+	flag.Parse()
+	
+	if !*yFlag {
+		confirmRun()
+	}
+	if *zFlag {
+		unzipToCurrentDirectory()
+	}
+	if *frFlag {
+		extractFolders()
+	}
 	createOutputFolder()
 	processFiles()
 	removeEmptyDirectories()
