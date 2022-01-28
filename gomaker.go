@@ -179,9 +179,11 @@ func runCompileCommand(file os.FileInfo, files_compiled *int, string_slice *[]st
 
 	if strings.Contains(file.Name(), "cpp") {
 		output_name = strings.TrimSuffix(file.Name(), ".cpp")
+		output_name = output_name + ".out"
 		cmd = exec.Command("g++", file.Name(), "-fdiagnostics-color=always", "-o", output_name, additional_flags)
 	} else {
 		output_name = strings.TrimSuffix(file.Name(), ".c")
+		output_name = output_name + ".out"
 		cmd = exec.Command("gcc", file.Name(), "-fdiagnostics-color=always", "-o", output_name, additional_flags)
 	}
 
@@ -238,7 +240,7 @@ func main() {
 	var yFlag = flag.Bool("y", false, "Skip confirmation prompt")
 	var zFlag = flag.Bool("z", false, "Unzips all .zip files")
 	flag.Parse()
-	
+
 	if !*yFlag {
 		confirmRun()
 	}
