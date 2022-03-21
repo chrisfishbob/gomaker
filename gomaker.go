@@ -128,7 +128,7 @@ func printExitInformation(string_slice *[]string,
 	fmt.Println("Compiled", files_compiled, "files in", end.Sub(start).Seconds(), "seconds")
 }
 
-func processFiles() {
+func processFiles(additional_flags string) {
 	start := time.Now()
 	files_compiled := 0
 	files_skipped := 0
@@ -151,7 +151,7 @@ func processFiles() {
 			defer wg.Done()
 
 			if isValidFile(file) {
-				runCompileCommand(file, &files_compiled, &string_slice, &stderr_slice)
+				runCompileCommand(file, &files_compiled, &string_slice, &stderr_slice, additional_flags)
 			} else {
 				files_skipped_string += file.Name() + "\n"
 				files_skipped++
@@ -172,18 +172,15 @@ func processFiles() {
 		files_skipped_string)
 }
 
-func runCompileCommand(file os.FileInfo, files_compiled *int, string_slice *[]string, stderr_slice *[]string) {
+func runCompileCommand(file os.FileInfo, files_compiled *int, string_slice *[]string, stderr_slice *[]string, additional_flags string) {
 	var cmd *exec.Cmd
 	var output_name string
-	additional_flags := "-lm"
 
 	if strings.Contains(file.Name(), "cpp") {
 		output_name = strings.TrimSuffix(file.Name(), ".cpp")
-		output_name = output_name + ".out"
 		cmd = exec.Command("g++", file.Name(), "-fdiagnostics-color=always", "-o", output_name, additional_flags)
 	} else {
 		output_name = strings.TrimSuffix(file.Name(), ".c")
-		output_name = output_name + ".out"
 		cmd = exec.Command("gcc", file.Name(), "-fdiagnostics-color=always", "-o", output_name, additional_flags)
 	}
 
@@ -235,10 +232,14 @@ func removeEmptyDirectories() {
 }
 
 func main() {
+	var additional_flags string
+
 	//take in the command line flags
 	var frFlag = flag.Bool("fr", false, "Flatten folders recursively")
 	var yFlag = flag.Bool("y", false, "Skip confirmation prompt")
 	var zFlag = flag.Bool("z", false, "Unzips all .zip files")
+	var fFlag = flag.Bool("f", false, "Additional flags for compilation")
+
 	flag.Parse()
 
 	if !*yFlag {
@@ -250,8 +251,15 @@ func main() {
 	if *frFlag {
 		extractFolders()
 	}
+
+	if *fFlag {
+		// Prompt user for additonal flag
+		fmt.Println("Please enter additional flags for compilation:")
+		fmt.Scanln(&additional_flags)
+	}
+
 	createOutputFolder()
-	processFiles()
+	processFiles(additional_flags)
 	removeEmptyDirectories()
-	fmt.Print("Compilation complete.")
+	fmt.Println("Compilation complete.")
 }
