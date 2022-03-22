@@ -238,10 +238,19 @@ func runCompileCommand(file os.FileInfo, files_compiled *int, string_slice *[]st
 
 	if strings.Contains(file.Name(), "cpp") {
 		output_name = strings.TrimSuffix(file.Name(), ".cpp")
-		cmd = exec.Command("g++", file.Name(), "-fdiagnostics-color=always", "-o", output_name, additional_flags)
+		if additional_flags == "none" {
+			cmd = exec.Command("g++", file.Name(), "-fdiagnostics-color=always", "-o", output_name)
+		} else {
+			cmd = exec.Command("g++", file.Name(), "-fdiagnostics-color=always", "-o", output_name, additional_flags)
+		}
 	} else {
 		output_name = strings.TrimSuffix(file.Name(), ".c")
-		cmd = exec.Command("gcc", file.Name(), "-fdiagnostics-color=always", "-o", output_name, additional_flags)
+
+		if additional_flags == "none" {
+			cmd = exec.Command("gcc", file.Name(), "-fdiagnostics-color=always", "-o", output_name)
+		} else {
+			cmd = exec.Command("gcc", file.Name(), "-fdiagnostics-color=always", "-o", output_name, additional_flags)
+		}
 	}
 
 	// Ensures that warnings and errors are printed
@@ -292,7 +301,7 @@ func removeEmptyDirectories() {
 }
 
 func main() {
-	var additional_flags string
+	additional_flags := "none"
 
 	//take in the command line flags
 	var frFlag = flag.Bool("fr", false, "Flatten folders recursively")
