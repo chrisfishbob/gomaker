@@ -88,15 +88,32 @@ func underLineLimit(filename string, limit int) bool {
 		currentLine = strings.TrimRight(currentLine, " \t")
 
 		if len([]rune(currentLine)) > limit {
-			fmt.Println("File: " + filename + "is over the line limit.")
+			fmt.Println("\n", filename, "FAILED style test")
 			fmt.Println("\tThe failed line has", len([]rune(currentLine)), "characters.")
-			fmt.Print("\tThe limit is", limit, "\n\n")
+			fmt.Print("\tThe limit is ", limit, "\n\n")
 			return false
 		}
 	}
 
 	file.Close()
 	return true
+}
+
+func runStyleCheckOnly (function_lines_limit int, line_char_limit int) {
+	files, err := ioutil.ReadDir(".")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	for _, file := range files {
+		if isValidFile(file) {
+			passed_first_test := underLineLimit(file.Name(), line_char_limit)
+			// Only check for the second criteria if the first passes
+			if passed_first_test {
+				functionLengthUnderLimit(file.Name(), function_lines_limit)
+			}
+		}
+	}
 }
 
 func Unzip(src string, dest string) ([]string, error) {
@@ -340,8 +357,20 @@ func main() {
 	var zFlag = flag.Bool("z", false, "Unzips all .zip files")
 	var fFlag = flag.Bool("f", false, "Additional flags for compilation")
 	var sFlag = flag.Bool("s", false, "Enable style check")
+	var styleOnlyFlag = flag.Bool("styleonly", false, "Only do style check, no compilation")
 
 	flag.Parse()
+
+	if *styleOnlyFlag {
+		fmt.Print("Please enter the function length limit: ")
+		fmt.Scanln(&function_lenth_limit)
+		fmt.Print("Please enter the characters per line limit: ")
+		fmt.Scanln(&characters_per_line_limit)
+
+		runStyleCheckOnly(function_lenth_limit, characters_per_line_limit)
+
+		return
+	}
 
 	if *yFlag {
 		confirmRun()
