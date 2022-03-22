@@ -188,7 +188,7 @@ func printExitInformation(string_slice *[]string,
 	fmt.Println("Compiled", files_compiled, "files in", end.Sub(start).Seconds(), "seconds")
 }
 
-func processFiles(additional_flags string, check_for_style bool) {
+func processFiles(additional_flags string, check_for_style bool, function_line_limit int) {
 	start := time.Now()
 	files_compiled := 0
 	files_skipped := 0
@@ -211,7 +211,8 @@ func processFiles(additional_flags string, check_for_style bool) {
 			defer wg.Done()
 
 			if isValidFile(file){
-				if check_for_style && functionLengthUnderLimit(file.Name(), 50) || !check_for_style{
+				// Only compile the file if it passes the style test or if style-checking is disabled
+				if check_for_style && functionLengthUnderLimit(file.Name(), function_line_limit) || !check_for_style{
 					runCompileCommand(file, &files_compiled, &string_slice, &stderr_slice, additional_flags)
 				}
 			} else {
@@ -305,6 +306,7 @@ func removeEmptyDirectories() {
 func main() {
 	additional_flags := "none"
 	check_for_style := false
+	function_lenth_limit := 0
 
 	//take in the command line flags
 	var frFlag = flag.Bool("fr", false, "Flatten folders recursively")
@@ -327,16 +329,18 @@ func main() {
 
 	if *fFlag {
 		// Prompt user for additonal flag
-		fmt.Println("Please enter additional flags for compilation:")
+		fmt.Print("Please enter additional flags for compilation: ")
 		fmt.Scanln(&additional_flags)
 	}
 
 	if *sFlag {
 		check_for_style = true
+		fmt.Print("Please enter the function length limit: ")
+		fmt.Scanln(&function_lenth_limit)
 	}
 
 	createOutputFolder()
-	processFiles(additional_flags, check_for_style)
+	processFiles(additional_flags, check_for_style, function_lenth_limit)
 	removeEmptyDirectories()
 	fmt.Println("Compilation complete.")
 }
