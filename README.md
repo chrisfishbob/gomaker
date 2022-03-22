@@ -1,6 +1,6 @@
 <img src="https://github.com/chrisfishbob/gomaker/blob/main/gophers.png" width="430" height="430" align="left"/> 
 
-# Gomaker
+# **Gomaker**
 A lightning-fast multi-threaded concurrent compiling tool with customizable style checking
 
 ## Purpose
@@ -16,7 +16,7 @@ make
 ```
 <br/>
 
-## Usage
+## Basic Usage
 ### To simply compile all the C/C++ files in the current directory:
 ```
 ./gomaker
@@ -24,7 +24,7 @@ make
 This command will compile all the C/C++ files and place it in the "output" folder. <br/><br/>
 Files that compiled smoothly, compiled with warning, and failed to compile are displayed to the terminal in their own sections. Along with
 the warning/error message, if applicable. <br/><br/>
-Files that were skipped (i.e. not a valid C/C++ file) will be skipped and will also be displayed to the terminal. <br/><br/>
+Files that were skipped (i.e. not a valid C/C++ file) will be skipped and will also be displayed to the terminal. <br/><br/><br/>
 
 ### To compile with basic style check:
 ```
@@ -39,11 +39,13 @@ The style checker will stop checking a given file when one violation is found an
 ./gomaker -s -pedantic
 ```
 The `-pedantic` flag adds an additional prompt for the user to enter banned keywords/features (e.x. using namespace std) <br/><br/>
-Note that the pedantic option cannot be used without `-s`
+Note that the pedantic option cannot be used without `-s`. <br/><br/><br/>
 
 ### To simply check for style:
 ```
 ./gomaker -styleonly
 ```
-Checks for style compliance and reports any violations in terminal. <br/><br>
+Checks for style compliance and reports violations in terminal. No files will be compiled. <br/><br>
 
+
+### 
