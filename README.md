@@ -1,7 +1,7 @@
 <img src="https://github.com/chrisfishbob/gomaker/blob/main/gophers.png" width="350" height="350" align="left"/> 
 
 # Gomaker
-A lightning-fast multi-threaded concurrent compiling tool with style checking
+A lightning-fast multi-threaded concurrent compiling tool with customizable style checking
 
 ## Purpose
 Gomaker provides the ability to rapidly compile hundreds of C/C++ source files rapidly through concurrency. <br/><br/>
