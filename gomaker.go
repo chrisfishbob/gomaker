@@ -30,11 +30,11 @@ func usedBannedKeyword(filename string, banned_words []string) bool {
 	scanner := bufio.NewScanner(file)
 
 	for scanner.Scan() {
-		for _, bannedbanned_word := range banned_words {
-			if strings.Contains(scanner.Text(), bannedbanned_word) {
+		for _, banned_word := range banned_words {
+			if strings.Contains(scanner.Text(), banned_word) {
 				mutex.Lock()
 				fmt.Println("\n", filename, "FAILED style test")
-				fmt.Print("\tBanned keyword: ", bannedbanned_word, " used on line ",
+				fmt.Print("\tBanned keyword: ", banned_word, " used on line ",
 					current_line_number, "\n\n")
 				mutex.Unlock()
 				return true
@@ -138,7 +138,11 @@ func underLineLimit(filename string, limit int) bool {
 	return true
 }
 
-func runStyleCheckOnly(function_lines_limit int, line_char_limit int) {
+
+// Does not return any value, prints out style errors in terminal
+// Unlike the style check during compilation, this does not terminate
+// once an error is found
+func runStyleCheckOnly(function_lines_limit int, line_char_limit int, pedantic bool, banned_words []string) {
 	files, err := ioutil.ReadDir(".")
 	if err != nil {
 		fmt.Println(err)
@@ -146,18 +150,10 @@ func runStyleCheckOnly(function_lines_limit int, line_char_limit int) {
 
 	for _, file := range files {
 		if isValidFile(file) {
-			var passed_first_test bool
-			var passed_second_test bool
-			var banned_words = []string{"using namespace std"}
+			underLineLimit(file.Name(), line_char_limit)
+			functionLengthUnderLimit(file.Name(), function_lines_limit)
 
-			passed_first_test = underLineLimit(file.Name(), line_char_limit)
-
-			// Only check for the second criteria if the first passes
-			if passed_first_test {
-				passed_second_test = functionLengthUnderLimit(file.Name(), function_lines_limit)
-			}
-
-			if passed_second_test {
+			if pedantic {
 				usedBannedKeyword(file.Name(), banned_words)
 			}
 
@@ -403,6 +399,9 @@ func main() {
 	check_for_style := false
 	function_lenth_limit := 0
 	characters_per_line_limit := 0
+	var banned_words string
+	var banned_words_slice []string
+	bufio := bufio.NewReader(os.Stdin)
 
 	//take in the command line flags
 	var frFlag = flag.Bool("fr", false, "Flatten folders recursively")
@@ -411,6 +410,7 @@ func main() {
 	var fFlag = flag.Bool("f", false, "Additional flags for compilation")
 	var sFlag = flag.Bool("s", false, "Enable style check")
 	var styleOnlyFlag = flag.Bool("styleonly", false, "Only do style check, no compilation")
+	var pedanticFlag = flag.Bool("pedantic", false, "Bans certain feaures of C/C++")
 
 	flag.Parse()
 
@@ -420,7 +420,16 @@ func main() {
 		fmt.Print("Please enter the characters per line limit: ")
 		fmt.Scanln(&characters_per_line_limit)
 
-		runStyleCheckOnly(function_lenth_limit, characters_per_line_limit)
+		// If pedantic, then we need to ask for the banned words
+		if *pedanticFlag {
+			// TODO: Enable pedantic flag with normal compilation
+			fmt.Print("Please enter the banned words: ")
+			banned_words, _ = bufio.ReadString('\n')
+			banned_words = strings.TrimSuffix(banned_words, "\n")
+			banned_words_slice = strings.Split(banned_words, ",")
+		}
+
+		runStyleCheckOnly(function_lenth_limit, characters_per_line_limit, *pedanticFlag, banned_words_slice)
 
 		return
 	}
