@@ -19,9 +19,9 @@ import (
 // Global mutex for printing with threads
 var mutex sync.Mutex
 
-
-// Returns true if the user 
+// Returns true if the user
 func usedBannedKeyword(filename string, banned_words []string) bool {
+	current_line_number := 0
 	file, err := os.OpenFile(filename, os.O_RDONLY, 0666)
 	if err != nil {
 		fmt.Println(err)
@@ -32,9 +32,16 @@ func usedBannedKeyword(filename string, banned_words []string) bool {
 	for scanner.Scan() {
 		for _, bannedbanned_word := range banned_words {
 			if strings.Contains(scanner.Text(), bannedbanned_word) {
+				mutex.Lock()
+				fmt.Println("\n", filename, "FAILED style test")
+				fmt.Print("\tBanned keyword: ", bannedbanned_word, " used on line ",
+					current_line_number, "\n\n")
+				mutex.Unlock()
 				return true
 			}
 		}
+
+		current_line_number++
 	}
 
 	return false
@@ -47,7 +54,6 @@ func functionLengthUnderLimit(filename string, limit int) bool {
 	functionLength := 0
 	blockStartLine := 0
 	currentLineNumber := 0
-	
 
 	file, err := os.OpenFile(filename, os.O_RDONLY, 0666)
 	if err != nil {
@@ -110,7 +116,6 @@ func underLineLimit(filename string, limit int) bool {
 		fmt.Println(err)
 	}
 	scanner := bufio.NewScanner(file)
-	
 
 	for scanner.Scan() {
 		currentLine = scanner.Text()
@@ -133,7 +138,7 @@ func underLineLimit(filename string, limit int) bool {
 	return true
 }
 
-func runStyleCheckOnly (function_lines_limit int, line_char_limit int) {
+func runStyleCheckOnly(function_lines_limit int, line_char_limit int) {
 	files, err := ioutil.ReadDir(".")
 	if err != nil {
 		fmt.Println(err)
@@ -141,11 +146,21 @@ func runStyleCheckOnly (function_lines_limit int, line_char_limit int) {
 
 	for _, file := range files {
 		if isValidFile(file) {
-			passed_first_test := underLineLimit(file.Name(), line_char_limit)
+			var passed_first_test bool
+			var passed_second_test bool
+			var banned_words = []string{"using namespace std"}
+
+			passed_first_test = underLineLimit(file.Name(), line_char_limit)
+
 			// Only check for the second criteria if the first passes
 			if passed_first_test {
-				functionLengthUnderLimit(file.Name(), function_lines_limit)
+				passed_second_test = functionLengthUnderLimit(file.Name(), function_lines_limit)
 			}
+
+			if passed_second_test {
+				usedBannedKeyword(file.Name(), banned_words)
+			}
+
 		}
 	}
 }
@@ -286,10 +301,14 @@ func processFiles(additional_flags string, check_for_style bool,
 			// We defer wg.Done() to decrement waitgroup regarless of validity of name
 			defer wg.Done()
 
+			var banned = []string{"using namespace std"}
+
+			// Only compile the file if it passes the style test or if style-checking is disabled
 			if (isValidFile(file) && check_for_style && functionLengthUnderLimit(file.Name(),
-				function_line_limit) && underLineLimit(file.Name(), chars_per_line_limit)) ||
+				function_line_limit) && underLineLimit(file.Name(), chars_per_line_limit) && 
+				!usedBannedKeyword(file.Name(), banned)) ||
 				(isValidFile(file) && !check_for_style) {
-				// Only compile the file if it passes the style test or if style-checking is disabled
+
 				runCompileCommand(file, &files_compiled, &string_slice, &stderr_slice, additional_flags)
 
 			} else {
