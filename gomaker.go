@@ -188,7 +188,7 @@ func printExitInformation(string_slice *[]string,
 	fmt.Println("Compiled", files_compiled, "files in", end.Sub(start).Seconds(), "seconds")
 }
 
-func processFiles(additional_flags string) {
+func processFiles(additional_flags string, check_for_style bool) {
 	start := time.Now()
 	files_compiled := 0
 	files_skipped := 0
@@ -210,8 +210,10 @@ func processFiles(additional_flags string) {
 			// We defer wg.Done() to decrement waitgroup regarless of validity of name
 			defer wg.Done()
 
-			if isValidFile(file) && functionLengthUnderLimit(file.Name(), 50){
-				runCompileCommand(file, &files_compiled, &string_slice, &stderr_slice, additional_flags)
+			if isValidFile(file){
+				if check_for_style && functionLengthUnderLimit(file.Name(), 50) || !check_for_style{
+					runCompileCommand(file, &files_compiled, &string_slice, &stderr_slice, additional_flags)
+				}
 			} else {
 				files_skipped_string += file.Name() + "\n"
 				files_skipped++
@@ -302,16 +304,18 @@ func removeEmptyDirectories() {
 
 func main() {
 	additional_flags := "none"
+	check_for_style := false
 
 	//take in the command line flags
 	var frFlag = flag.Bool("fr", false, "Flatten folders recursively")
-	var yFlag = flag.Bool("y", false, "Skip confirmation prompt")
+	var yFlag = flag.Bool("y", false, "Enable confirmation prompt")
 	var zFlag = flag.Bool("z", false, "Unzips all .zip files")
 	var fFlag = flag.Bool("f", false, "Additional flags for compilation")
+	var sFlag = flag.Bool("s", false, "Enable style check")
 
 	flag.Parse()
 
-	if !*yFlag {
+	if *yFlag {
 		confirmRun()
 	}
 	if *zFlag {
@@ -327,8 +331,12 @@ func main() {
 		fmt.Scanln(&additional_flags)
 	}
 
+	if *sFlag {
+		check_for_style = true
+	}
+
 	createOutputFolder()
-	processFiles(additional_flags)
+	processFiles(additional_flags, check_for_style)
 	removeEmptyDirectories()
 	fmt.Println("Compilation complete.")
 }
