@@ -1,4 +1,4 @@
-<img src="https://github.com/chrisfishbob/gomaker/blob/main/gophers.png" width="350" height="350" align="left"/> 
+<img src="https://github.com/chrisfishbob/gomaker/blob/main/gophers.png" width="430" height="430" align="left"/> 
 
 # Gomaker
 A lightning-fast multi-threaded concurrent compiling tool with customizable style checking
@@ -38,4 +38,5 @@ After the prompt, compiling with style check behaves almost identically as the b
 ./gomaker -s -pedantic
 ```
 The `-pedantic` flag adds an additional prompt for the user to enter banned keywords/features (e.x. using namespace std) <br/><br/>
+Note that the pedantic option cannot be used without `-s`
 
