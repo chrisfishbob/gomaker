@@ -32,7 +32,7 @@ Files that were skipped (i.e. not a valid C/C++ file) will be skipped and will a
 ```
 The program will prompt the user to enter two parameters: How long each function block can be, and character limit per line. <br/><br/>
 After the prompt, compiling with style check behaves almost identically as the basic use case, with the exception that files are checked for style compliance before compilation begins. <br/><br/>
-The style checker will stop checking a given file when one violation is found and move on to the next file. <br/><br/>
+The style checker will stop checking a given file when one violation is found and move on to the next file. <br/><br/><br/>
 
 ### To compile with stict style check:
 ```
