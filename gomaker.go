@@ -16,6 +16,9 @@ import (
 	"time"
 )
 
+// Global mutex for printing with threads
+var mutex sync.Mutex
+
 func functionLengthUnderLimit(filename string, limit int) bool {
 	var currentLine string
 	openBraceCount := 0
@@ -23,6 +26,7 @@ func functionLengthUnderLimit(filename string, limit int) bool {
 	functionLength := 0
 	blockStartLine := 0
 	currentLineNumber := 0
+	
 
 	file, err := os.OpenFile(filename, os.O_RDONLY, 0666)
 	if err != nil {
@@ -53,10 +57,13 @@ func functionLengthUnderLimit(filename string, limit int) bool {
 		if openBraceCount == closeBraceCount {
 			// We check limit - 2 because we don't count the braces
 			if functionLength-2 > limit {
+				// Lock mutex
+				mutex.Lock()
 				fmt.Println("\n", filename, "FAILED style test")
 				fmt.Println("\tBlock at line", blockStartLine, "is too long")
 				fmt.Println("\tThe block is", functionLength-2, "long")
 				fmt.Print("\tThe limit is ", limit, "\n\n")
+				mutex.Unlock()
 				return false
 			} else {
 				functionLength = 0
@@ -88,9 +95,11 @@ func underLineLimit(filename string, limit int) bool {
 		currentLine = strings.TrimRight(currentLine, " \t")
 
 		if len([]rune(currentLine)) > limit {
+			mutex.Lock()
 			fmt.Println("\n", filename, "FAILED style test")
 			fmt.Println("\tThe failed line has", len([]rune(currentLine)), "characters.")
 			fmt.Print("\tThe limit is ", limit, "\n\n")
+			mutex.Unlock()
 			return false
 		}
 	}
