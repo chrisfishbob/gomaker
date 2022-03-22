@@ -74,6 +74,28 @@ func functionLengthUnderLimit(filename string, limit int) bool {
 	return true
 }
 
+func underLineLimit(filename string, limit int) bool {
+	file, err := os.OpenFile(filename, os.O_RDONLY, 0666)
+	if err != nil {
+		fmt.Println(err)
+	}
+	scanner := bufio.NewScanner(file)
+	var currentLine string
+
+	for scanner.Scan() {
+		currentLine = scanner.Text()
+		// trim all trailing whitespace
+		currentLine = strings.TrimRight(currentLine, " \t")
+
+		if len([]rune(currentLine)) > limit {
+			return false
+		}
+	}
+
+	file.Close()
+	return true
+}
+
 func Unzip(src string, dest string) ([]string, error) {
 
 	var filenames []string
@@ -187,7 +209,8 @@ func printExitInformation(string_slice *[]string,
 	fmt.Println("Compiled", files_compiled, "files in", end.Sub(start).Seconds(), "seconds")
 }
 
-func processFiles(additional_flags string, check_for_style bool, function_line_limit int) {
+func processFiles(additional_flags string, check_for_style bool,
+	function_line_limit int, chars_per_line_limit int) {
 	start := time.Now()
 	files_compiled := 0
 	files_skipped := 0
@@ -210,10 +233,11 @@ func processFiles(additional_flags string, check_for_style bool, function_line_l
 			defer wg.Done()
 
 			if (isValidFile(file) && check_for_style && functionLengthUnderLimit(file.Name(),
-				function_line_limit)) || (isValidFile(file) && !check_for_style) {
+				function_line_limit) && underLineLimit(file.Name(), chars_per_line_limit)) ||
+				(isValidFile(file) && !check_for_style) {
 				// Only compile the file if it passes the style test or if style-checking is disabled
 				runCompileCommand(file, &files_compiled, &string_slice, &stderr_slice, additional_flags)
-			
+
 			} else {
 				files_skipped_string += file.Name() + "\n"
 				files_skipped++
@@ -306,6 +330,7 @@ func main() {
 	additional_flags := "none"
 	check_for_style := false
 	function_lenth_limit := 0
+	characters_per_line_limit := 0
 
 	//take in the command line flags
 	var frFlag = flag.Bool("fr", false, "Flatten folders recursively")
@@ -336,10 +361,12 @@ func main() {
 		check_for_style = true
 		fmt.Print("Please enter the function length limit: ")
 		fmt.Scanln(&function_lenth_limit)
+		fmt.Print("Please enter the characters per line limit: ")
+		fmt.Scanln(&characters_per_line_limit)
 	}
 
 	createOutputFolder()
-	processFiles(additional_flags, check_for_style, function_lenth_limit)
+	processFiles(additional_flags, check_for_style, function_lenth_limit, characters_per_line_limit)
 	removeEmptyDirectories()
 	fmt.Println("Compilation complete.")
 }
