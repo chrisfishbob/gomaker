@@ -138,7 +138,6 @@ func underLineLimit(filename string, limit int) bool {
 	return true
 }
 
-
 // Does not return any value, prints out style errors in terminal
 // Unlike the style check during compilation, this does not terminate
 // once an error is found
@@ -274,8 +273,34 @@ func printExitInformation(string_slice *[]string,
 	fmt.Println("Compiled", files_compiled, "files in", end.Sub(start).Seconds(), "seconds")
 }
 
+func shouldCompile(file os.FileInfo,
+	check_for_style bool,
+	function_length_limit int,
+	line_length_limit int,
+	banned_words []string) bool {
+
+	// If the file is a valid C/C++ file and we need to check for style and
+	// the file passes the style check, then we should compile
+	if isValidFile(file) && 
+		check_for_style && 
+		functionLengthUnderLimit(file.Name(), function_length_limit) && 
+		underLineLimit(file.Name(), line_length_limit) && 
+		!usedBannedKeyword(file.Name(), banned_words) {
+
+		return true
+	} 
+
+	// If the file is a valid C/C++ file and we do not need to check for style,
+	// we should also compile
+	if isValidFile(file) && !check_for_style {
+		return true
+	}
+
+	return false		
+}
+
 func processFiles(additional_flags string, check_for_style bool,
-	function_line_limit int, chars_per_line_limit int) {
+	function_line_limit int, chars_per_line_limit int, banned_words []string) {
 	start := time.Now()
 	files_compiled := 0
 	files_skipped := 0
@@ -297,16 +322,9 @@ func processFiles(additional_flags string, check_for_style bool,
 			// We defer wg.Done() to decrement waitgroup regarless of validity of name
 			defer wg.Done()
 
-			var banned = []string{"using namespace std"}
-
-			// Only compile the file if it passes the style test or if style-checking is disabled
-			if (isValidFile(file) && check_for_style && functionLengthUnderLimit(file.Name(),
-				function_line_limit) && underLineLimit(file.Name(), chars_per_line_limit) && 
-				!usedBannedKeyword(file.Name(), banned)) ||
-				(isValidFile(file) && !check_for_style) {
-
+			// Check if the file should be compiled
+			if shouldCompile(file, check_for_style, function_line_limit, chars_per_line_limit, banned_words) {
 				runCompileCommand(file, &files_compiled, &string_slice, &stderr_slice, additional_flags)
-
 			} else {
 				files_skipped_string += file.Name() + "\n"
 				files_skipped++
@@ -414,20 +432,20 @@ func main() {
 
 	flag.Parse()
 
+	// If pedantic, then we need to ask for the banned words
+	if *pedanticFlag {
+		// TODO: Enable pedantic flag with normal compilation
+		fmt.Print("Please enter the banned words: ")
+		banned_words, _ = bufio.ReadString('\n')
+		banned_words = strings.TrimSuffix(banned_words, "\n")
+		banned_words_slice = strings.Split(banned_words, ", ")
+	}
+
 	if *styleOnlyFlag {
 		fmt.Print("Please enter the function length limit: ")
 		fmt.Scanln(&function_lenth_limit)
 		fmt.Print("Please enter the characters per line limit: ")
 		fmt.Scanln(&characters_per_line_limit)
-
-		// If pedantic, then we need to ask for the banned words
-		if *pedanticFlag {
-			// TODO: Enable pedantic flag with normal compilation
-			fmt.Print("Please enter the banned words: ")
-			banned_words, _ = bufio.ReadString('\n')
-			banned_words = strings.TrimSuffix(banned_words, "\n")
-			banned_words_slice = strings.Split(banned_words, ",")
-		}
 
 		runStyleCheckOnly(function_lenth_limit, characters_per_line_limit, *pedanticFlag, banned_words_slice)
 
@@ -459,7 +477,7 @@ func main() {
 	}
 
 	createOutputFolder()
-	processFiles(additional_flags, check_for_style, function_lenth_limit, characters_per_line_limit)
+	processFiles(additional_flags, check_for_style, function_lenth_limit, characters_per_line_limit, banned_words_slice)
 	removeEmptyDirectories()
 	fmt.Println("Compilation complete.")
 }
