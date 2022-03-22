@@ -210,10 +210,13 @@ func processFiles(additional_flags string, check_for_style bool, function_line_l
 			// We defer wg.Done() to decrement waitgroup regarless of validity of name
 			defer wg.Done()
 
-			if isValidFile(file){
+			if isValidFile(file) {
 				// Only compile the file if it passes the style test or if style-checking is disabled
 				if check_for_style && functionLengthUnderLimit(file.Name(), function_line_limit) || !check_for_style{
 					runCompileCommand(file, &files_compiled, &string_slice, &stderr_slice, additional_flags)
+				} else {
+					files_skipped_string += file.Name() + "\n"
+					files_skipped++
 				}
 			} else {
 				files_skipped_string += file.Name() + "\n"
