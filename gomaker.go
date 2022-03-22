@@ -19,6 +19,27 @@ import (
 // Global mutex for printing with threads
 var mutex sync.Mutex
 
+
+// Returns true if the user 
+func usedBannedKeyword(filename string, banned_words []string) bool {
+	file, err := os.OpenFile(filename, os.O_RDONLY, 0666)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	scanner := bufio.NewScanner(file)
+
+	for scanner.Scan() {
+		for _, bannedbanned_word := range banned_words {
+			if strings.Contains(scanner.Text(), bannedbanned_word) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func functionLengthUnderLimit(filename string, limit int) bool {
 	var currentLine string
 	openBraceCount := 0
@@ -82,12 +103,14 @@ func functionLengthUnderLimit(filename string, limit int) bool {
 }
 
 func underLineLimit(filename string, limit int) bool {
+	var currentLine string
+	currentLineNumber := 1
 	file, err := os.OpenFile(filename, os.O_RDONLY, 0666)
 	if err != nil {
 		fmt.Println(err)
 	}
 	scanner := bufio.NewScanner(file)
-	var currentLine string
+	
 
 	for scanner.Scan() {
 		currentLine = scanner.Text()
@@ -97,11 +120,13 @@ func underLineLimit(filename string, limit int) bool {
 		if len([]rune(currentLine)) > limit {
 			mutex.Lock()
 			fmt.Println("\n", filename, "FAILED style test")
-			fmt.Println("\tThe failed line has", len([]rune(currentLine)), "characters.")
+			fmt.Println("\tLine", currentLineNumber, "has", len([]rune(currentLine)), "characters.")
 			fmt.Print("\tThe limit is ", limit, "\n\n")
 			mutex.Unlock()
 			return false
 		}
+
+		currentLineNumber++
 	}
 
 	file.Close()
