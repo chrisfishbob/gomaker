@@ -13,7 +13,67 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"bufio"
 )
+
+func functionLengthUnderLimit(filename string, limit int) bool{
+    var currentLine string
+    openBraceCount := 0
+    closeBraceCount := 0
+    functionLength := 0
+    blockStartLine := 0
+    currentLineNumber := 0
+
+    file, err := os.OpenFile(filename, os.O_RDONLY, 0666)
+    if err != nil {
+        fmt.Println(err)
+    }
+    scanner := bufio.NewScanner(file)
+    
+
+    for scanner.Scan() {
+        currentLineNumber++
+        currentLine = scanner.Text()
+        // trim all trailing whitespace
+        currentLine = strings.TrimRight(currentLine, " \t")
+
+        if strings.Contains(currentLine, "{") {
+            // If it's the first open brace, it marks the beginning of a block
+            if openBraceCount == 0 {
+                blockStartLine = currentLineNumber
+            }
+
+            openBraceCount++
+        }
+
+        if strings.Contains(currentLine, "}") {
+            closeBraceCount++
+        }
+
+        // If open == close, then we're at the end of a function
+        if openBraceCount == closeBraceCount {
+            // We check limit - 2 because we don't count the braces
+            if functionLength - 2 > limit {
+                fmt.Println("\n", filename, "FAILED style test")
+                fmt.Println("\tBlock at line", blockStartLine, "is too long")
+                fmt.Println("\tThe block is", functionLength - 2, "long")
+                fmt.Print("\tThe limit is ", limit, "\n\n")
+                return false
+            } else {
+                functionLength = 0
+                closeBraceCount = 0
+                openBraceCount = 0
+                blockStartLine = 0
+            }
+        }
+
+        functionLength++
+    }
+
+    file.Close()
+
+    return true
+}
 
 func Unzip(src string, dest string) ([]string, error) {
 
@@ -150,7 +210,7 @@ func processFiles(additional_flags string) {
 			// We defer wg.Done() to decrement waitgroup regarless of validity of name
 			defer wg.Done()
 
-			if isValidFile(file) {
+			if isValidFile(file) && functionLengthUnderLimit(file.Name(), 50){
 				runCompileCommand(file, &files_compiled, &string_slice, &stderr_slice, additional_flags)
 			} else {
 				files_skipped_string += file.Name() + "\n"
