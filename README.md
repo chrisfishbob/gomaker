@@ -1,3 +1,4 @@
+<img src="relative/path/in/repository/to/image.svg" width="128"/>
 # gomaker
 A lightning-fast multi-threaded concurrent compiling tool with style checking
 
