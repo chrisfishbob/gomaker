@@ -88,6 +88,9 @@ func underLineLimit(filename string, limit int) bool {
 		currentLine = strings.TrimRight(currentLine, " \t")
 
 		if len([]rune(currentLine)) > limit {
+			fmt.Println("File: " + filename + "is over the line limit.")
+			fmt.Println("\tThe failed line has", len([]rune(currentLine)), "characters.")
+			fmt.Print("\tThe limit is", limit, "\n\n")
 			return false
 		}
 	}
@@ -323,7 +326,6 @@ func removeEmptyDirectories() {
 	if err != nil {
 		fmt.Println(err)
 	}
-
 }
 
 func main() {
