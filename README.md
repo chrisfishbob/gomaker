@@ -41,11 +41,39 @@ The style checker will stop checking a given file when one violation is found an
 The `-pedantic` flag adds an additional prompt for the user to enter banned keywords/features (e.x. using namespace std) <br/><br/>
 Note that the pedantic option cannot be used without `-s`. <br/><br/><br/>
 
+
+### To compile with additional compiler flags:
+```
+./gomaker -f
+```
+The `-f` flag adds an additional prompt for the user to enter additonal compiler flags, most often used for linking. <br/><br/>
+The additonal flag only applies when the source file compiles, the `-s` and `-pedantic` flags are unaffected and can be used in conjunction with
+`-f` to combine their effects.<br/><br/><br/>
+
+
+
 ### To simply check for style:
 ```
 ./gomaker -styleonly
 ```
-Checks for style compliance and reports violations in terminal. No files will be compiled. <br/><br>
+Checks for style compliance and reports violations in terminal. No files will be compiled. <br/><br><br/>
 
 
-### 
+## Advanced Usage:
+### To flatten all folders recursively before compiling:
+```
+./gomake -fr -y
+```
+If the target directory contains folders that encloses the source files (e.x. when some student submit souce files directly, while others submit their files in a folder), adding the `-fr` flag will retract all the files before compilation begins like normal. <br/><br/>
+
+The `-y` flag enables a confirmation prompt before the program executes.<br/><br/>
+
+Warning: It is highly recommend that the `-rf` flag is always accompanied by `-y` as flattening directories could be destructive if done in the wrong path. <br/><br/> <br/>
+
+
+### To unzip all zipfiles before compiling:
+```
+./gomake -z
+```
+The `-z` flag will extract all the contents of any .zip files before compilation begins like normal. <br/><br/>
+Combining the `-fr` and `-z` flag is possible, the archives will first be unzipped before source extraction begins.<br/><br/>
