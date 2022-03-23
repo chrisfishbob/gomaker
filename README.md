@@ -1,4 +1,4 @@
-<img src="https://github.com/chrisfishbob/gomaker/blob/main/gophers.png" width="450" height="4350" align="left"/> 
+<img src="https://github.com/chrisfishbob/gomaker/blob/main/gophers.png" width="450" height="450" align="left"/> 
 
 # **Gomaker**
 A lightning-fast multi-threaded concurrent compiling tool with customizable style checking
