@@ -8,13 +8,20 @@ Gomaker provides the ability to rapidly compile hundreds of C/C++ source files r
 Gomaker also provides basic style checking, either before compilation or independently. <br/><br/>
 The main use case of Gomaker is to compile large quantities of independent source files that all do a similar task. (e.x. A university assignment) <br/>
 
+## Dependencies:
+Go and Python3 is required for the compilation and install process. GCC/G++ is required during runtime. <br/><br/>
+```
+sudo apt install python3 gcc g++ go
+```
+<br/><br/>
 
 ## Build
-### Using the provided Makefile
+### Using the provided install script
 ```
-make
+python3 install.py
 ```
-place the executable in the directory with the target C/C++ source files (install script pending). <br/><br/><br/>
+Enter the password if prompted. <br/><br/>
+The compiled binary will be installed at /usr/local/bin. <br/><br/><br/>
 
 ## Basic Usage
 ### To simply compile all the C/C++ files in the current directory:
