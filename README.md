@@ -76,4 +76,15 @@ Warning: It is highly recommend that the `-rf` flag is always accompanied by `-y
 ./gomake -z
 ```
 The `-z` flag will extract all the contents of any .zip files before compilation begins like normal. <br/><br/>
-Combining the `-fr` and `-z` flag is possible, the archives will first be unzipped before source extraction begins.<br/><br/>
+Combining the `-fr` and `-z` flag is possible, the archives will first be unzipped before source extraction begins.<br/><br/><br/>
+
+## Features and Progress:
+- :white_check_mark: Compiles all source files in one thread
+- :white_check_mark: Compiles all source files concurrently via Goroutines
+- :white_check_mark: Option to extract source files recursively
+- :white_check_mark: Option to unzip .zip files
+- :white_check_mark: Option to add additional compiler flags
+- :white_check_mark: Character line limit check
+- :white_check_mark: Function line limit check
+- :white_check_mark: Banned feature usage check
+- 🔷 Colored outputs for style check (in progress)
