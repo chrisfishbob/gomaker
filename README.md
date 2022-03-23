@@ -88,4 +88,5 @@ Combining the `-fr` and `-z` flag is possible, the archives will first be unzipp
 - :white_check_mark: Function line limit check
 - :white_check_mark: Banned feature usage check
 - :white_check_mark: Install script
+- 🔷 Colored results for style check (in progress)
 
