@@ -113,5 +113,5 @@ Combining the `-fr` and `-z` flag is possible, the archives will first be unzipp
 - 🔷 Colored results for style check (in progress)
 - 🔷 Change line / character limit with flags (queued)
 - 🔷 Support for other C/C++ compilers (candidate feature, not guaranteed)
-- 🔷 Colored results for style check (candidate feature, not guaranteed)
+- 🔷 Support for other compiled languages (candidate feature, not guaranteed)
 
