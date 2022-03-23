@@ -53,7 +53,15 @@ The style checker will stop checking a given file when one violation is found an
 gomaker -s -pedantic
 ```
 The `-pedantic` flag adds an additional prompt for the user to enter banned keywords/features (e.x. using namespace std) <br/><br/>
-Note that the pedantic option cannot be used without `-s`. <br/><br/><br/>
+Note that the pedantic option cannot be used without `-s`. <br/><br/>
+
+The banned words should be separated by a comma and a space, for example:
+```
+Please entered the banned words: 
+
+using namespace std, banned2, morestuff
+```
+<br/>
 
 
 ### To compile with additional compiler flags:
