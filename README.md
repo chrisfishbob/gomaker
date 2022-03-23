@@ -14,7 +14,7 @@ The main use case of Gomaker is to compile large quantities of independent sourc
 ```
 make
 ```
-<br/>
+place the executable in the directory with the target C/C++ source files (install script pending). <br/>
 
 ## Basic Usage
 ### To simply compile all the C/C++ files in the current directory:
