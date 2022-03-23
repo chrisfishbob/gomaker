@@ -10,8 +10,12 @@ The main use case of Gomaker is to compile large quantities of independent sourc
 
 ## Dependencies:
 Go and Python3 is required for the compilation and install process. GCC/G++ is required during runtime. <br/><br/>
-Instruction for installation varies by system and can be found in their respective websites.
-<br/><br/>
+Instruction for installation varies by system and can be found in their respective websites. <br/><br/>
+Checking if a given program is already installed can be done with `which`. To check if Go is installed:
+```
+which go
+```
+If installed, the path to the binary will be displayed. <br/><br/>
 
 ## Build
 ### Using the provided install script
