@@ -28,7 +28,7 @@ Check if the installation is successful:
 ```
 which gomaker
 ````
-<br/><br/><br/>
+<br/><br/>
 
 ## Basic Usage
 ### To simply compile all the C/C++ files in the current directory:
