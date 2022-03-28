@@ -111,6 +111,7 @@ Combining the `-fr` and `-z` flag is possible, the archives will first be unzipp
 - :white_check_mark: Banned feature usage check
 - :white_check_mark: Install script
 - 🔷 Colored results for style check (in progress)
+- 🔷 More robust parsing to cover function declaration within classes in C++ (queued)
 - 🔷 Change line / character limit with flags (queued)
 - 🔷 Support for other C/C++ compilers (candidate feature, not guaranteed)
 - 🔷 Support for other compiled languages (candidate feature, not guaranteed)
