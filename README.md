@@ -84,7 +84,7 @@ Checks for style compliance and reports violations in terminal. No files will be
 ## Advanced Usage:
 ### To flatten all folders recursively before compiling:
 ```
-gomake -fr -y
+gomaker -fr -y
 ```
 If the target directory contains folders that encloses the source files (e.x. when some student submit souce files directly, while others submit their files in a folder), adding the `-fr` flag will retract all the files before compilation begins like normal. <br/><br/>
 
