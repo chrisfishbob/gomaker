@@ -110,9 +110,13 @@ Combining the `-fr` and `-z` flag is possible, the archives will first be unzipp
 - :white_check_mark: Function line limit check
 - :white_check_mark: Banned feature usage check
 - :white_check_mark: Install script
-- 🔷 Colored results for style check (in progress)
-- 🔷 More robust parsing to cover function declaration within classes in C++ (queued)
-- 🔷 Change line / character limit with flags (queued)
-- 🔷 Support for other C/C++ compilers (candidate feature, not guaranteed)
-- 🔷 Support for other compiled languages (candidate feature, not guaranteed)
+- 🔷 Colored results for style check (Canceleed, I no longer work for the CS Department!)
+- 🔷 More robust parsing to cover function declaration within classes in C++ (Canceleed, I no longer work for the CS Department!)
+- 🔷 Change line / character limit with flags (Canceleed, I no longer work for the CS Department!)
+- 🔷 Support for other C/C++ compilers (Canceleed, I no longer work for the CS Department!)
+- 🔷 Support for other compiled languages (Canceleed, I no longer work for the CS Department!)
+
+
+## Notes
+If some of the code style seems suspicous, it probabaly is. This was made to save me time, so this is pretty scrappy, and I was also a worse programmer (that's a good thing!)
 
