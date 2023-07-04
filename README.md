@@ -1,3 +1,7 @@
+# STOP !!!
+This is not good code! I wrote this when I was a much worse SDE. This works fine but is gross. 
+
+
 <img src="https://github.com/chrisfishbob/gomaker/blob/main/HighResGopher.png" width="450" height="450" align="left"/> 
 
 # **Gomaker**
